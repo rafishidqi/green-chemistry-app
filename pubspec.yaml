@@ -28,6 +28,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  provider: ^6.1.2
+  http: ^1.2.0
+  shared_preferences: ^2.2.3
   flutter:
     sdk: flutter
 
@@ -38,7 +41,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+    
+  provider: ^6.1.2
+  http: ^1.2.2
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
