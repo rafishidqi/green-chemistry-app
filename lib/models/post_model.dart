@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class PostModel {
   final int idKonten;
   final int idAuthor;
@@ -38,36 +40,31 @@ class PostModel {
     }
 
     final List<dynamic>? categoriesData = json['categories'] as List<dynamic>?;
-    
+
     // Inisialisasi list untuk ID dan Nama Kategori
     List<int> ids = [];
     List<String> names = [];
-    
+
     if (categoriesData != null) {
       for (var cat in categoriesData) {
-        // Ambil ID dari data kategori
-        final id = cat['kategori_id'];
-        
-        // Ambil Nama dari data kategori
-        final name = cat['nama_kategori'] ?? cat['kategori_id'];
-        
-        // Amankan ID dan tambahkan ke list ID
-        if (id != null) {
-          int? parsedId;
-          if (id is int) {
-            parsedId = id;
-          } else if (id is String) {
-            parsedId = int.tryParse(id);
+        if (cat is Map) {
+          // Hanya ambil ID asli dari API, jangan gunakan hashCode
+          dynamic idValue = cat['id_kategori'];
+          String? name = cat['kategori_id'] ?? cat['kategori_en'];
+
+          // Parse ID hanya jika ada nilai asli dari API
+          int? id;
+          if (idValue is String) {
+            id = int.tryParse(idValue);
+          } else if (idValue is int) {
+            id = idValue;
           }
-          
-          if (parsedId != null) {
-            ids.add(parsedId);
+
+          // Tambahkan ke list hanya jika ID valid dari API
+          if (name != null && id != null && id > 0) {
+            ids.add(id);
+            names.add(name);
           }
-        }
-        
-        // Simpan nama kategori (String)
-        if (name is String) {
-          names.add(name);
         }
       }
     }
@@ -91,7 +88,13 @@ class PostModel {
 
   // method untuk mengubah PostModel menjadi Map agar bisa dikirim ke PostEditScreen
   Map<String, dynamic> toMap() {
-    return {
+    if (kDebugMode) {
+      print('=== POST MODEL TO MAP ===');
+      print('categoryIds: $categoryIds');
+      print('categoryNames: $categoryNames');
+    }
+    
+    final result = {
       'id': idKonten, // Di mapping ke 'id' di PostEditScreen
       'id_author': idAuthor,
       'judul_id': judulId,
@@ -104,5 +107,10 @@ class PostModel {
       // 🟢 PERBAIKAN KRITIS: Kirim List<int> (ID kategori) untuk inisialisasi di PostEditScreen
       'categories': categoryIds ?? [], // Sekarang mengirim List<int>
     };
+    
+    if (kDebugMode) {
+      print('toMap result: $result');
+    }
+    return result;
   }
 }

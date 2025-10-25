@@ -16,17 +16,41 @@ class CustomDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              auth.isLoggedIn ? auth.userName ?? "User" : "Pengunjung",
-              style: const TextStyle(fontWeight: FontWeight.bold),
+          Container(
+            height: 160,
+            width: double.infinity,
+            decoration: const BoxDecoration(color: Color.fromARGB(255, 2, 63, 114)),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  "Welcome",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  auth.isLoggedIn ? auth.userName ?? "User" : "Pengunjung",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  auth.isLoggedIn ? "Terdaftar" : "Belum login",
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
-            accountEmail: Text(auth.isLoggedIn ? "Terdaftar" : "Belum login"),
-            currentAccountPicture: const CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 40, color: Colors.green),
-            ),
-            decoration: const BoxDecoration(color: Colors.green),
           ),
 
           // 🏠 Beranda (All Posts)

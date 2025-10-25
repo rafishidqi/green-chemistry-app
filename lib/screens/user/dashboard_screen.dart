@@ -60,7 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               itemCount: postProvider.posts.length,
               itemBuilder: (context, index) {
                 PostModel post = postProvider.posts[index];
-                return PostCard(post: post); // Tombol edit sudah diatur di PostCard
+                return PostCard(post: post, showEditButton: true);
               },
             ),
           );

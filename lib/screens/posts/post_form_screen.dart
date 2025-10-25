@@ -112,127 +112,404 @@ class _PostFormScreenState extends State<PostFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Buat Postingan Baru'),
-      ),
+      backgroundColor: Colors.grey[100],
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Judul (Indonesia)
-                    TextFormField(
-                      controller: _judulIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Judul (Bahasa Indonesia) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Judul wajib diisi' : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Judul (English)
-                    TextFormField(
-                      controller: _judulEnController,
-                      decoration: const InputDecoration(
-                        labelText: 'Judul (English)',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Deskripsi (Indonesia)
-                    TextFormField(
-                      controller: _descIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Deskripsi (Bahasa Indonesia) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 5,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Deskripsi wajib diisi' : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Deskripsi (English)
-                    TextFormField(
-                      controller: _descEnController,
-                      decoration: const InputDecoration(
-                        labelText: 'Deskripsi (English)',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 5,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // URL Gambar
-                    TextFormField(
-                      controller: _imageUrlController,
-                      decoration: const InputDecoration(
-                        labelText: 'URL Gambar (opsional)',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 🔹 Pilihan Kategori
-                    const Text(
-                      'Kategori:',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    if (_categories.isEmpty)
-                      const Text('Memuat kategori...')
-                    else
-                      Wrap(
-                        spacing: 10,
-                        children: _categories.map((cat) {
-                          final id = cat['id_kategori'];
-                          final indo = cat['kategori_id'] ?? '';
-                          final eng = cat['kategori_en'] ?? '';
-                          final displayName = (indo.isNotEmpty && eng.isNotEmpty)
-                              ? '$indo ($eng)'
-                              : (indo.isNotEmpty ? indo : (eng.isNotEmpty ? eng : 'Tanpa nama'));
-
-                          final isSelected = _selectedCategories.contains(id);
-
-                          return FilterChip(
-                            label: Text(displayName),
-                            selected: isSelected,
-                            onSelected: (bool selected) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedCategories.add(id);
-                                } else {
-                                  _selectedCategories.remove(id);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    const SizedBox(height: 24),
-
-                    // Tombol Submit
-                    SizedBox(
+          : SafeArea(
+              child: isSmallScreen
+                  ? Container(
                       width: double.infinity,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.send),
-                        label: Text(_loading ? 'Mengirim...' : 'Kirim Postingan'),
-                        onPressed: _loading ? null : _submitPost,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Header untuk mobile
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Buat Postingan',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    icon: const Icon(Icons.close, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ..._buildFormFields(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Container(
+                        margin: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(24),
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Header untuk desktop
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Buat Postingan',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      icon: const Icon(Icons.close, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 3,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                ..._buildFormFields(),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ],
+            ),
+    );
+  }
+
+  List<Widget> _buildFormFields() {
+    return [
+      // Judul field
+                        Text(
+                          'Judul',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _judulIdController,
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan judul postingan',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          validator: (val) =>
+                              val == null || val.isEmpty ? 'Judul wajib diisi' : null,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Judul English
+                        Text(
+                          'Judul (English)',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _judulEnController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter title in English',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Description
+                        Text(
+                          'Deskripsi',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _descIdController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan deskripsi postingan',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          validator: (val) =>
+                              val == null || val.isEmpty ? 'Deskripsi wajib diisi' : null,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Description English
+                        Text(
+                          'Deskripsi (English)',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _descEnController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: 'Enter description in English',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Image URL
+                        Text(
+                          'URL Gambar',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _imageUrlController,
+                          decoration: InputDecoration(
+                            hintText: 'https://example.com/image.jpg',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.blue),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Tags (Categories)
+                        Text(
+                          'Kategori',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (_categories.isEmpty)
+                          const Text('Memuat kategori...')
+                        else
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _categories.map((cat) {
+                              final id = cat['id_kategori'];
+                              final indo = cat['kategori_id'] ?? '';
+                              final eng = cat['kategori_en'] ?? '';
+                              final displayName = (indo.isNotEmpty && eng.isNotEmpty)
+                                  ? '$indo ($eng)'
+                                  : (indo.isNotEmpty ? indo : (eng.isNotEmpty ? eng : 'Tanpa nama'));
+
+                              final isSelected = _selectedCategories.contains(id);
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedCategories.remove(id);
+                                    } else {
+                                      _selectedCategories.add(id);
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? Colors.blue[100] : Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: isSelected ? Colors.blue : Colors.grey[300]!,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (isSelected)
+                                        Container(
+                                          width: 6,
+                                          height: 6,
+                                          margin: const EdgeInsets.only(right: 6),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.blue,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      Text(
+                                        displayName,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isSelected ? Colors.blue[700] : Colors.grey[600],
+                                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+      const SizedBox(height: 32),
+
+      // Action buttons
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: BorderSide(color: Colors.grey[300]!),
+              ),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-    );
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _loading ? null : _submitPost,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black87,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                _loading ? 'Mengirim...' : 'Kirim',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 }

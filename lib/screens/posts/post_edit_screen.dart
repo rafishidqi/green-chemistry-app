@@ -39,18 +39,31 @@ class _PostEditScreenState extends State<PostEditScreen> {
     _descEnController = TextEditingController(text: widget.postData['description_en']);
     _imageUrlController = TextEditingController(text: widget.postData['image_url']);
 
-    // PERBAIKAN: Mengamankan inisialisasi kategori dari data yang diterima (Line 42)
+    // Debug: Print semua data post
+    debugPrint('=== POST EDIT DEBUG ===');
+    debugPrint('Full postData: ${widget.postData}');
+    debugPrint('Categories raw: ${widget.postData['categories']}');
+    debugPrint('Categories type: ${widget.postData['categories'].runtimeType}');
+    
+    // Inisialisasi kategori terpilih dari data post
     final categoriesData = widget.postData['categories'];
-
-    if (categoriesData is List) {
-        // Konversi aman List<dynamic> ke List<int>
-        _selectedCategories = categoriesData
-            .map((e) => e is int ? e : int.tryParse(e.toString())) 
-            .where((id) => id != null) 
-            .cast<int>() 
-            .toList();
+    
+    if (categoriesData is List && categoriesData.isNotEmpty) {
+      debugPrint('Categories list length: ${categoriesData.length}');
+      for (int i = 0; i < categoriesData.length; i++) {
+        debugPrint('Category $i: ${categoriesData[i]} (${categoriesData[i].runtimeType})');
+      }
+      
+      // Data dari PostModel.toMap() sudah berupa List<int>
+      _selectedCategories = categoriesData
+          .where((id) => id is int && id > 0)
+          .cast<int>()
+          .toList();
+      
+      debugPrint('Selected categories after parsing: $_selectedCategories');
     } else {
-        _selectedCategories = [];
+      debugPrint('Categories data is empty or not a List');
+      _selectedCategories = [];
     }
 
     _fetchCategories();
@@ -83,8 +96,11 @@ class _PostEditScreenState extends State<PostEditScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        debugPrint('=== CATEGORIES FROM API ===');
+        debugPrint('API Categories: ${data['data']}');
         setState(() {
           _categories = data['data'];
+          debugPrint('Selected categories in setState: $_selectedCategories');
         });
       } else {
         throw Exception('Gagal mengambil kategori');
@@ -159,138 +175,407 @@ class _PostEditScreenState extends State<PostEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+    
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Postingan'),
-      ),
+      backgroundColor: Colors.grey[100],
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Judul (Indonesia)
-                    TextFormField(
-                      controller: _judulIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Judul (Bahasa Indonesia) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Judul wajib diisi' : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Judul (English)
-                    TextFormField(
-                      controller: _judulEnController,
-                      decoration: const InputDecoration(
-                        labelText: 'Judul (English)',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Deskripsi (Indonesia)
-                    TextFormField(
-                      controller: _descIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Deskripsi (Bahasa Indonesia) *',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 5,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Deskripsi wajib diisi' : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Deskripsi (English)
-                    TextFormField(
-                      controller: _descEnController,
-                      decoration: const InputDecoration(
-                        labelText: 'Deskripsi (English)',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 5,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // URL Gambar
-                    TextFormField(
-                      controller: _imageUrlController,
-                      decoration: const InputDecoration(
-                        labelText: 'URL Gambar (opsional)',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 🔹 Pilihan Kategori
-                    const Text(
-                      'Kategori:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    const SizedBox(height: 8),
-                    if (_categories.isEmpty)
-                      const Text('Memuat kategori...')
-                    else
-                      Wrap(
-                        spacing: 10,
-                        children: _categories.map((cat) {
-                          // Ambil ID kategori dari API response
-                          final id = cat['id_kategori']; 
-                          final indo = cat['kategori_id'] ?? '';
-                          final eng = cat['kategori_en'] ?? '';
-                          final displayName = (indo.isNotEmpty && eng.isNotEmpty)
-                              ? '$indo ($eng)'
-                              : (indo.isNotEmpty ? indo : (eng.isNotEmpty ? eng : 'Tanpa nama'));
-
-                          // Konversi ID ke int secara aman untuk FilterChip
-                          int categoryId = 0;
-                          if (id is int) {
-                            categoryId = id;
-                          } else if (id is String) {
-                            categoryId = int.tryParse(id) ?? 0;
-                          }
-
-                          final isSelected = _selectedCategories.contains(categoryId);
-
-                          return FilterChip(
-                            label: Text(displayName),
-                            selected: isSelected,
-                            onSelected: (bool selected) {
-                              setState(() {
-                                if (selected) {
-                                  // Pastikan hanya ID > 0 yang ditambahkan
-                                  if (categoryId > 0) { 
-                                    _selectedCategories.add(categoryId);
-                                  }
-                                } else {
-                                  _selectedCategories.remove(categoryId);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    const SizedBox(height: 24),
-
-                    // Tombol Submit
-                    SizedBox(
+          : SafeArea(
+              child: isSmallScreen
+                  ? Container(
                       width: double.infinity,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.save),
-                        label: Text(_loading ? 'Menyimpan...' : 'Simpan Perubahan'),
-                        onPressed: _loading ? null : _updatePost,
+                      height: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Edit Postingan',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    icon: const Icon(Icons.close, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ..._buildFormFields(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Container(
+                        margin: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(24),
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Edit Postingan',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      icon: const Icon(Icons.close, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 3,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                ..._buildFormFields(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+    );
+  }
+
+  List<Widget> _buildFormFields() {
+    return [
+      Text(
+        'Judul',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[700],
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: _judulIdController,
+        decoration: InputDecoration(
+          hintText: 'Masukkan judul postingan',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+        validator: (val) => val == null || val.isEmpty ? 'Judul wajib diisi' : null,
+      ),
+      const SizedBox(height: 20),
+
+      Text(
+        'Judul (English)',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[700],
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: _judulEnController,
+        decoration: InputDecoration(
+          hintText: 'Enter title in English',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+      ),
+      const SizedBox(height: 20),
+
+      Text(
+        'Deskripsi',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[700],
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: _descIdController,
+        maxLines: 4,
+        decoration: InputDecoration(
+          hintText: 'Masukkan deskripsi postingan',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+        validator: (val) => val == null || val.isEmpty ? 'Deskripsi wajib diisi' : null,
+      ),
+      const SizedBox(height: 20),
+
+      Text(
+        'Deskripsi (English)',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[700],
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: _descEnController,
+        maxLines: 4,
+        decoration: InputDecoration(
+          hintText: 'Enter description in English',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+      ),
+      const SizedBox(height: 20),
+
+      Text(
+        'URL Gambar',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[700],
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: _imageUrlController,
+        decoration: InputDecoration(
+          hintText: 'https://example.com/image.jpg',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+      ),
+      const SizedBox(height: 20),
+
+      Text(
+        'Kategori',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[700],
+        ),
+      ),
+      const SizedBox(height: 12),
+      if (_categories.isEmpty)
+        const Text('Memuat kategori...')
+      else
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _categories.map((cat) {
+            final id = cat['id_kategori'];
+            final indo = cat['kategori_id'] ?? '';
+            final eng = cat['kategori_en'] ?? '';
+            final displayName = (indo.isNotEmpty && eng.isNotEmpty)
+                ? '$indo ($eng)'
+                : (indo.isNotEmpty ? indo : (eng.isNotEmpty ? eng : 'Tanpa nama'));
+
+            int categoryId = 0;
+            if (id is int) {
+              categoryId = id;
+            } else if (id is String) {
+              categoryId = int.tryParse(id) ?? 0;
+            }
+
+            final isSelected = _selectedCategories.contains(categoryId);
+            
+            // Debug untuk setiap kategori
+            debugPrint('Category: $displayName, ID: $categoryId, Selected: $isSelected, SelectedList: $_selectedCategories');
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _selectedCategories.remove(categoryId);
+                  } else {
+                    if (categoryId > 0) {
+                      _selectedCategories.add(categoryId);
+                    }
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.blue[100] : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? Colors.blue : Colors.grey[300]!,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSelected)
+                      Container(
+                        width: 6,
+                        height: 6,
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: const BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    Text(
+                      displayName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected ? Colors.blue[700] : Colors.grey[600],
+                        fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                       ),
                     ),
                   ],
                 ),
               ),
+            );
+          }).toList(),
+        ),
+      const SizedBox(height: 32),
+
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => Navigator.pop(context),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: BorderSide(color: Colors.grey[300]!),
+              ),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-    );
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _loading ? null : _updatePost,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black87,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                _loading ? 'Menyimpan...' : 'Simpan',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
+
+
 }
