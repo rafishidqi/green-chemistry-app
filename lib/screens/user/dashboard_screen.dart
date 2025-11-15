@@ -30,12 +30,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       drawer: const CustomDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Ambil provider sebelum async operation
+          final postProvider = Provider.of<PostProvider>(context, listen: false);
+
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const PostFormScreen()),
           ).then((_) {
             // Refresh list setelah kembali dari create
-            Provider.of<PostProvider>(context, listen: false).fetchUserPosts();
+            postProvider.fetchUserPosts();
           });
         },
         child: const Icon(Icons.add),

@@ -4,6 +4,8 @@ import '../models/post_model.dart';
 import '../screens/posts/post_detail_screen.dart';
 import '../screens/posts/post_edit_screen.dart';
 import '../providers/auth_provider.dart';
+import '../providers/translate_provider.dart';
+import '../config/translate.dart';
 
 class PostCard extends StatelessWidget {
   final PostModel post;
@@ -15,6 +17,7 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Ambil userId dari AuthProvider
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final localization = Provider.of<TranslateProvider>(context);
     final currentUserId = authProvider.userId ?? 0;
 
     // Cek apakah post ini milik user login
@@ -75,7 +78,7 @@ class PostCard extends StatelessWidget {
                 children: [
                   // Judul
                   Text(
-                    post.judulId,
+                    localization.isEnglish ? post.judulEn : post.judulId,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -84,7 +87,7 @@ class PostCard extends StatelessWidget {
 
                   // Deskripsi
                   Text(
-                    post.descriptionId,
+                    localization.isEnglish ? post.descriptionEn : post.descriptionId,
                     style: const TextStyle(color: Colors.grey, fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -96,7 +99,7 @@ class PostCard extends StatelessWidget {
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
                         icon: const Icon(Icons.edit, size: 16),
-                        label: const Text('Edit'),
+                        label: Text(AppTranslate.translate('edit', localization.currentLanguage)),
                         onPressed: () {
                           Navigator.push(
                             context,

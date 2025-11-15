@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../providers/post_provider.dart';
+import '../../providers/translate_provider.dart';
+import '../../config/translate.dart';
 import '../../widgets/custom_drawer.dart';
 import '../../widgets/post_card.dart';
 import '../../models/post_model.dart';
@@ -53,7 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showSearchDialog(BuildContext context) {
     final TextEditingController searchController = TextEditingController();
-    
+    final localization = Provider.of<TranslateProvider>(context, listen: false);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -69,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            child: Text(AppTranslate.translate('cancel', localization.currentLanguage)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -137,9 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localization = Provider.of<TranslateProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Beranda'),
+        title: Text(AppTranslate.translate('home', localization.currentLanguage)),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -155,7 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (postProvider.posts.isEmpty) {
-            return const Center(child: Text('Belum ada postingan'));
+            return Center(
+              child: Text(AppTranslate.translate('no_posts', localization.currentLanguage)),
+            );
           }
 
           return RefreshIndicator(
@@ -184,6 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🔹 Widget untuk Carousel Horizontal (5 berita terbaru)
   Widget _buildCarousel(List<PostModel> posts) {
+    final localization = Provider.of<TranslateProvider>(context);
+
     // Ambil maksimal 5 post terbaru
     final carouselPosts = posts.take(5).toList();
 
@@ -197,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Text(
-            'Berita Sensor Dan Kimia Hijau ',
+            AppTranslate.translate('news_title', localization.currentLanguage),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.grey[700],
@@ -313,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             // Judul
                             Text(
-                              post.judulId,
+                              localization.isEnglish ? post.judulEn : post.judulId,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -379,6 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 🔹 Widget untuk Tab Filter Kategori (dinamis dari data)
   Widget _buildCategoryTabs(List<PostModel> posts) {
+    final localization = Provider.of<TranslateProvider>(context);
+
     // Kumpulkan semua kategori unik dari posts
     final Set<int> categoryIds = {};
     final Map<int, String> categoryMap = {};
@@ -399,7 +410,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         child: Text(
-          'Tidak ada kategori tersedia',
+          AppTranslate.translate('no_categories', localization.currentLanguage),
           style: TextStyle(color: Colors.grey[600]),
         ),
       );
@@ -421,7 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Semua',
+                    AppTranslate.translate('all_categories', localization.currentLanguage),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: _selectedCategoryId == null

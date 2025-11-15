@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/translate_provider.dart';
 import '../../config/constants.dart' as constants;
+import '../../config/translate.dart';
 
 class PostEditScreen extends StatefulWidget {
   final Map<String, dynamic> postData; // data post yang mau diedit
@@ -81,9 +83,12 @@ class _PostEditScreenState extends State<PostEditScreen> {
   }
 
   Future<void> _fetchCategories() async {
+    // Ambil token sebelum async operation
+    final authToken = Provider.of<AuthProvider>(context, listen: false).token;
+
     final prefs = await SharedPreferences.getInstance();
     // Pastikan Anda mendapatkan token dengan benar dari AuthProvider atau SharedPreferences
-    final token = Provider.of<AuthProvider>(context, listen: false).token ?? prefs.getString('token');
+    final token = authToken ?? prefs.getString('token');
 
     try {
       final response = await http.get(
@@ -93,6 +98,8 @@ class _PostEditScreenState extends State<PostEditScreen> {
           'Authorization': 'Bearer $token',
         },
       );
+
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -108,7 +115,7 @@ class _PostEditScreenState extends State<PostEditScreen> {
     } catch (e) {
       debugPrint('Error fetching categories: $e');
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Gagal mengambil kategori')),
         );
       }
@@ -177,7 +184,8 @@ class _PostEditScreenState extends State<PostEditScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+    final localization = Provider.of<TranslateProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: _loading
@@ -200,9 +208,9 @@ class _PostEditScreenState extends State<PostEditScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'Edit Postingan',
-                                    style: TextStyle(
+                                  Text(
+                                    AppTranslate.translate('edit_post', localization.currentLanguage),
+                                    style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black87,
@@ -231,7 +239,7 @@ class _PostEditScreenState extends State<PostEditScreen> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -247,9 +255,9 @@ class _PostEditScreenState extends State<PostEditScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
-                                      'Edit Postingan',
-                                      style: TextStyle(
+                                    Text(
+                                      AppTranslate.translate('edit_post', localization.currentLanguage),
+                                      style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,

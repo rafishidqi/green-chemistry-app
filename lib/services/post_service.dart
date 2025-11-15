@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/post_model.dart';
@@ -67,7 +68,7 @@ class PostService {
       'categories': categories ?? [],
     };
 
-    print('📦 BODY DIKIRIM: ${jsonEncode(body)}');
+    debugPrint('📦 BODY DIKIRIM: ${jsonEncode(body)}');
 
     final response = await http.post(
       Uri.parse('${constants.baseUrl}/posts'),
@@ -79,8 +80,8 @@ class PostService {
       body: jsonEncode(body),
     );
 
-    print('📥 RESPONSE STATUS: ${response.statusCode}');
-    print('📥 RESPONSE BODY: ${response.body}');
+    debugPrint('📥 RESPONSE STATUS: ${response.statusCode}');
+    debugPrint('📥 RESPONSE BODY: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Gagal membuat postingan: ${response.body}');
@@ -122,7 +123,7 @@ class PostService {
       body: jsonEncode(body),
     );
 
-    print('📥 RESPONSE UPDATE: ${response.body}');
+    debugPrint('📥 RESPONSE UPDATE: ${response.body}');
 
     if (response.statusCode != 200) {
       throw Exception('Gagal memperbarui postingan: ${response.body}');

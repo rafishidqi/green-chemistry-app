@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../models/post_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/post_provider.dart';
+import '../../providers/translate_provider.dart';
+import '../../config/translate.dart';
 import 'post_edit_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
@@ -16,7 +18,6 @@ class PostDetailScreen extends StatefulWidget {
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   bool _showFullDescription = false;
-  double _descriptionHeight = 0;
 
   void _navigateToEditScreen() {
     Navigator.push(
@@ -81,38 +82,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     });
   }
 
-  double _calculateDescriptionHeight(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final descSize = size.width >= 600
-        ? 16.0
-        : size.width < 320
-            ? 12.0
-            : (size.width < 360 ? 13.0 : 14.0);
-    
-    // Hitung tinggi teks berdasarkan panjang deskripsi
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: widget.post.descriptionId.isNotEmpty
-            ? widget.post.descriptionId
-            : '(Tidak ada deskripsi)',
-        style: TextStyle(
-          fontSize: descSize,
-          height: 1.6,
-        ),
-      ),
-      maxLines: null,
-      textDirection: TextDirection.ltr,
-    );
-    
-    textPainter.layout(maxWidth: size.width - 32); // padding kiri kanan
-    final textHeight = textPainter.size.height;
-    
-    // Maksimal 50% dari tinggi layar untuk deskripsi saja
-    final maxHeight = size.height * 0.5;
-    
-    return textHeight > maxHeight ? maxHeight : textHeight;
-  }
-
   double _calculateTitleHeight(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isExtraSmall = size.width < 320;
@@ -146,7 +115,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Debug logging untuk image URL
+    debugPrint('=== POST DETAIL DEBUG ===');
+    debugPrint('Post ID: ${widget.post.idKonten}');
+    debugPrint('Image URL: ${widget.post.imageUrl}');
+    debugPrint('Image URL is empty: ${widget.post.imageUrl?.isEmpty ?? true}');
+    debugPrint('Image URL is null: ${widget.post.imageUrl == null}');
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final localization = Provider.of<TranslateProvider>(context);
     final currentUserId = authProvider.userId ?? 0;
     final isOwner = widget.post.idAuthor == currentUserId;
 
@@ -154,7 +131,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final size = MediaQuery.of(context).size;
     final isExtraSmall = size.width < 320;
     final isSmall = size.width < 360;
-    final isMedium = size.width >= 360 && size.width < 600;
     final isTablet = size.width >= 600;
 
     // Dynamic sizing - gambar memenuhi layar
@@ -217,8 +193,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withOpacity(0.2),
-                          Colors.black.withOpacity(isSmall ? 0.7 : 0.6),
+                          Colors.black.withValues(alpha: 0.2),
+                          Colors.black.withValues(alpha: isSmall ? 0.7 : 0.6),
                         ],
                       ),
                     ),
@@ -336,7 +312,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                         'Penulis',
                                         style: TextStyle(
                                           fontSize: authorSubtextSize,
-                                          color: Colors.white.withOpacity(0.8),
+                                          color: Colors.white.withValues(alpha: 0.8),
                                         ),
                                       ),
                                     ],
@@ -447,7 +423,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         if (_showFullDescription) {
                           // Mode expanded - naik sampai setengah layar
                           return Positioned(
-                            bottom: 120,
+                            bottom: 80,
                             height: maxAllowedHeight,
                             left: 0,
                             right: 0,
@@ -457,7 +433,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.post.judulId,
+                                    localization.isEnglish ? widget.post.judulEn : widget.post.judulId,
                                     style: TextStyle(
                                       fontSize: titleSize,
                                       fontWeight: FontWeight.bold,
@@ -469,14 +445,30 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                   Expanded(
                                     child: SingleChildScrollView(
                                       child: Text(
-                                        widget.post.descriptionId.isNotEmpty
-                                            ? widget.post.descriptionId
-                                            : '(Tidak ada deskripsi)',
+                                        localization.isEnglish
+                                            ? (widget.post.descriptionEn.isNotEmpty
+                                                ? widget.post.descriptionEn
+                                                : '(No description)')
+                                            : (widget.post.descriptionId.isNotEmpty
+                                                ? widget.post.descriptionId
+                                                : '(Tidak ada deskripsi)'),
                                         style: TextStyle(
                                           fontSize: descSize,
                                           color: Colors.white,
                                           height: 1.6,
                                         ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  GestureDetector(
+                                    onTap: _toggleDescription,
+                                    child: Text(
+                                      AppTranslate.translate('see_less', localization.currentLanguage),
+                                      style: TextStyle(
+                                        fontSize: descSize,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
@@ -496,7 +488,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.post.judulId,
+                                    localization.isEnglish ? widget.post.judulEn : widget.post.judulId,
                                     style: TextStyle(
                                       fontSize: titleSize,
                                       fontWeight: FontWeight.bold,
@@ -511,9 +503,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          widget.post.descriptionId.isNotEmpty
-                                              ? widget.post.descriptionId
-                                              : '(Tidak ada deskripsi)',
+                                          localization.isEnglish
+                                              ? (widget.post.descriptionEn.isNotEmpty
+                                                  ? widget.post.descriptionEn
+                                                  : '(No description)')
+                                              : (widget.post.descriptionId.isNotEmpty
+                                                  ? widget.post.descriptionId
+                                                  : '(Tidak ada deskripsi)'),
                                           style: TextStyle(
                                             fontSize: descSize,
                                             color: Colors.white,
@@ -524,7 +520,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          'Lihat Selengkapnya',
+                                          AppTranslate.translate('see_more', localization.currentLanguage),
                                           style: TextStyle(
                                             fontSize: descSize,
                                             color: Colors.white,
@@ -543,56 +539,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     },
                   ),
 
-                  // Tombol "Lihat Lebih Sedikit" hanya untuk konten panjang
-                  Builder(
-                    builder: (context) {
-                      final size = MediaQuery.of(context).size;
-                      final titleHeight = _calculateTitleHeight(context);
-                      
-                      final textPainter = TextPainter(
-                        text: TextSpan(
-                          text: widget.post.descriptionId.isNotEmpty
-                              ? widget.post.descriptionId
-                              : '(Tidak ada deskripsi)',
-                          style: TextStyle(
-                            fontSize: descSize,
-                            height: 1.6,
-                          ),
-                        ),
-                        maxLines: null,
-                        textDirection: TextDirection.ltr,
-                      );
-                      textPainter.layout(maxWidth: size.width - 32);
-                      
-                      final totalContentHeight = titleHeight + textPainter.size.height + 12;
-                      final isContentLong = totalContentHeight > size.height * 0.5;
-                      
-                      if (!isContentLong || !_showFullDescription) {
-                        return const SizedBox.shrink();
-                      }
-                      
-                      return Positioned(
-                        bottom: 80,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: bodyPad,
-                          child: GestureDetector(
-                            onTap: _toggleDescription,
-                            child: Text(
-                              'Lihat Lebih Sedikit',
-                              style: TextStyle(
-                                fontSize: descSize,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+
                 ],
               ),
             ],

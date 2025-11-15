@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../config/constants.dart' as constants;
 
 class PostModel {
   final int idKonten;
@@ -28,6 +29,14 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    // Debug logging
+    if (kDebugMode) {
+      debugPrint('=== POST MODEL FROM JSON ===');
+      debugPrint('Full JSON: $json');
+      debugPrint('image_url value: ${json['image_url']}');
+      debugPrint('image_url type: ${json['image_url'].runtimeType}');
+    }
+
     // Fungsi helper untuk konversi aman ke int (Mengatasi error "Lingkungan" di field ID)
     int safeInt(dynamic value) {
       if (value == null) return 0;
@@ -69,16 +78,30 @@ class PostModel {
       }
     }
 
+    // Proses image_url - tambahkan base URL jika path relatif
+    String? imageUrl = json['image_url'];
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      // Jika bukan URL lengkap (tidak dimulai dengan http), tambahkan base URL
+      if (!imageUrl.startsWith('http')) {
+        // Ambil base URL tanpa /api
+        final baseUrlWithoutApi = constants.baseUrl.replaceAll('/api', '');
+        imageUrl = '$baseUrlWithoutApi/$imageUrl';
+      }
+      if (kDebugMode) {
+        debugPrint('Final Image URL: $imageUrl');
+      }
+    }
+
     return PostModel(
       // Menerapkan safeInt pada field yang bertipe int
       idKonten: safeInt(json['id_konten']),
       idAuthor: safeInt(json['id_author']),
-      
+
       judulId: json['judul_id'] ?? '',
       judulEn: json['judul_en'] ?? '',
       descriptionId: json['description_id'] ?? '',
       descriptionEn: json['description_en'] ?? '',
-      imageUrl: json['image_url'],
+      imageUrl: imageUrl,
       status: json['status'] ?? 'draft',
       authorName: json['author']?['name'],
       categoryNames: names.isEmpty ? null : names,
