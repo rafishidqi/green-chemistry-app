@@ -9,7 +9,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => PostProvider()), // penting!
+        ChangeNotifierProvider(create: (_) => PostProvider()),
       ],
       child: const MyApp(),
     ),
@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
       title: 'Green Chemistry App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
-      // Langsung ke HomeScreen (login nanti di drawer)
       home: const HomeScreen(),
     );
   }
