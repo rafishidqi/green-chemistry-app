@@ -310,7 +310,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                post.categoryNames?.first ?? 'News',
+                                localization.isEnglish
+                                    ? (post.categoryNamesEn?.first ?? 'News')
+                                    : (post.categoryNamesId?.first ?? 'Berita'),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -395,10 +397,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final Map<int, String> categoryMap = {};
 
     for (var post in posts) {
-      if (post.categoryIds != null && post.categoryNames != null) {
-        for (int i = 0; i < post.categoryIds!.length; i++) {
-          categoryIds.add(post.categoryIds![i]);
-          categoryMap[post.categoryIds![i]] = post.categoryNames![i];
+      if (post.categoryIds != null) {
+        final names = localization.isEnglish ? post.categoryNamesEn : post.categoryNamesId;
+        if (names != null) {
+          for (int i = 0; i < post.categoryIds!.length; i++) {
+            categoryIds.add(post.categoryIds![i]);
+            categoryMap[post.categoryIds![i]] = names[i];
+          }
         }
       }
     }

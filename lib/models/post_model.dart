@@ -11,8 +11,9 @@ class PostModel {
   final String? imageUrl;
   final String status;
   final String? authorName;
-  final List<String>? categoryNames; // Diganti namanya agar lebih jelas (List of Names)
-  final List<int>? categoryIds;       // TAMBAHAN: Untuk menyimpan ID Integer
+  final List<String>? categoryNamesId;  // Nama kategori dalam Bahasa Indonesia
+  final List<String>? categoryNamesEn;  // Nama kategori dalam Bahasa Inggris
+  final List<int>? categoryIds;         // ID kategori
 
   PostModel({
     required this.idKonten,
@@ -24,7 +25,8 @@ class PostModel {
     this.imageUrl,
     required this.status,
     this.authorName,
-    this.categoryNames,
+    this.categoryNamesId,
+    this.categoryNamesEn,
     this.categoryIds,
   });
 
@@ -50,16 +52,18 @@ class PostModel {
 
     final List<dynamic>? categoriesData = json['categories'] as List<dynamic>?;
 
-    // Inisialisasi list untuk ID dan Nama Kategori
+    // Inisialisasi list untuk ID dan Nama Kategori (bilingual)
     List<int> ids = [];
-    List<String> names = [];
+    List<String> namesId = [];
+    List<String> namesEn = [];
 
     if (categoriesData != null) {
       for (var cat in categoriesData) {
         if (cat is Map) {
           // Hanya ambil ID asli dari API, jangan gunakan hashCode
           dynamic idValue = cat['id_kategori'];
-          String? name = cat['kategori_id'] ?? cat['kategori_en'];
+          String? nameId = cat['kategori_id'];
+          String? nameEn = cat['kategori_en'];
 
           // Parse ID hanya jika ada nilai asli dari API
           int? id;
@@ -70,9 +74,10 @@ class PostModel {
           }
 
           // Tambahkan ke list hanya jika ID valid dari API
-          if (name != null && id != null && id > 0) {
+          if (id != null && id > 0) {
             ids.add(id);
-            names.add(name);
+            namesId.add(nameId ?? 'Tanpa nama');
+            namesEn.add(nameEn ?? 'No name');
           }
         }
       }
@@ -104,8 +109,9 @@ class PostModel {
       imageUrl: imageUrl,
       status: json['status'] ?? 'draft',
       authorName: json['author']?['name'],
-      categoryNames: names.isEmpty ? null : names,
-      categoryIds: ids.isEmpty ? null : ids, // Menggunakan list ID
+      categoryNamesId: namesId.isEmpty ? null : namesId,
+      categoryNamesEn: namesEn.isEmpty ? null : namesEn,
+      categoryIds: ids.isEmpty ? null : ids,
     );
   }
 
@@ -114,9 +120,10 @@ class PostModel {
     if (kDebugMode) {
       print('=== POST MODEL TO MAP ===');
       print('categoryIds: $categoryIds');
-      print('categoryNames: $categoryNames');
+      print('categoryNamesId: $categoryNamesId');
+      print('categoryNamesEn: $categoryNamesEn');
     }
-    
+
     final result = {
       'id': idKonten, // Di mapping ke 'id' di PostEditScreen
       'id_author': idAuthor,
@@ -127,10 +134,9 @@ class PostModel {
       'image_url': imageUrl ?? '',
       'status': status,
       'authorName': authorName ?? '',
-      // 🟢 PERBAIKAN KRITIS: Kirim List<int> (ID kategori) untuk inisialisasi di PostEditScreen
-      'categories': categoryIds ?? [], // Sekarang mengirim List<int>
+      'categories': categoryIds ?? [],
     };
-    
+
     if (kDebugMode) {
       print('toMap result: $result');
     }

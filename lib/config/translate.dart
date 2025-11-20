@@ -27,6 +27,7 @@ class AppTranslate {
       'confirm_delete': 'Apakah Anda yakin ingin menghapus postingan ini?',
       'cancel': 'Batal',
       'deleted_success': 'Postingan berhasil dihapus',
+      'category': 'Kategori',
 
       // Post Form
       'create_post': 'Buat Postingan',
@@ -56,6 +57,19 @@ class AppTranslate {
       'forgot_password': 'Lupa Kata Sandi?',
       'dont_have_account': 'Belum punya akun?',
       'already_have_account': 'Sudah punya akun?',
+
+      // Categories
+      'cat_green_chemistry': 'Kimia Hijau',
+      'cat_renewable_energy': 'Energi Terbarukan',
+      'cat_environment': 'Lingkungan',
+      'cat_biotechnology': 'Bioteknologi',
+      'cat_materials': 'Material',
+      'cat_food_technology': 'Teknologi Pangan',
+      'cat_nanotechnology': 'Nanoteknologi',
+      'cat_environmental_engineering': 'Rekayasa Lingkungan',
+      'cat_green_pharmacy': 'Farmasi Hijau',
+      'cat_waste_management': 'Pengelolaan Limbah',
+      'cat_clean_water_technology': 'Teknologi Air Bersih',
     },
     'en': {
       // Drawer
@@ -84,6 +98,7 @@ class AppTranslate {
       'confirm_delete': 'Are you sure you want to delete this post?',
       'cancel': 'Cancel',
       'deleted_success': 'Post deleted successfully',
+      'category': 'Category',
 
       // Post Form
       'create_post': 'Create Post',
@@ -113,6 +128,19 @@ class AppTranslate {
       'forgot_password': 'Forgot Password?',
       'dont_have_account': "Don't have an account?",
       'already_have_account': 'Already have an account?',
+
+      // Categories
+      'cat_green_chemistry': 'Green Chemistry',
+      'cat_renewable_energy': 'Renewable Energy',
+      'cat_environment': 'Environment',
+      'cat_biotechnology': 'Biotechnology',
+      'cat_materials': 'Materials',
+      'cat_food_technology': 'Food Technology',
+      'cat_nanotechnology': 'Nanotechnology',
+      'cat_environmental_engineering': 'Environmental Engineering',
+      'cat_green_pharmacy': 'Green Pharmacy',
+      'cat_waste_management': 'Waste Management',
+      'cat_clean_water_technology': 'Clean Water Technology',
     },
   };
 

@@ -232,37 +232,64 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ),
                   ),
 
-                  // Badge kategori
-                  if (widget.post.categoryNames != null && widget.post.categoryNames!.isNotEmpty)
+                  // Badge kategori - Tampilkan hanya 3 kategori pertama
+                  if (widget.post.categoryNamesId != null && widget.post.categoryNamesId!.isNotEmpty)
                     Positioned(
                       top: badgeTop,
                       left: 16,
                       right: 16,
-                      child: Wrap(
-                        spacing: isExtraSmall ? 3 : (isSmall ? 4 : 5),
-                        runSpacing: isExtraSmall ? 2 : (isSmall ? 2.5 : 3),
-                        children: widget.post.categoryNames!.take(5).map((category) {
-                          return Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isExtraSmall ? 8 : 12,
-                              vertical: isExtraSmall ? 4 : 6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Label "Kategori"
+                          Text(
+                            AppTranslate.translate('category', localization.currentLanguage),
+                            style: TextStyle(
+                              fontSize: isExtraSmall ? 10 : 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white70,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
+                          ),
+                          const SizedBox(height: 6),
+                          // Kategori badges (max 3)
+                          Wrap(
+                            spacing: isExtraSmall ? 3 : (isSmall ? 4 : 5),
+                            runSpacing: isExtraSmall ? 2 : (isSmall ? 2.5 : 3),
+                            children: List.generate(
+                              widget.post.categoryNamesId!.take(3).length, // Hanya 3 kategori
+                              (index) {
+                                final namesId = widget.post.categoryNamesId;
+                                final namesEn = widget.post.categoryNamesEn;
+
+                                final nameId = namesId != null && index < namesId.length ? namesId[index] : '';
+                                final nameEn = namesEn != null && index < namesEn.length ? namesEn[index] : '';
+                                final categoryName = '$nameId ($nameEn)';
+
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isExtraSmall ? 8 : 12,
+                                    vertical: isExtraSmall ? 4 : 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    categoryName,
+                                    style: TextStyle(
+                                      fontSize: chipFont,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              },
                             ),
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                fontSize: chipFont,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
+                          ),
+                        ],
                       ),
                     ),
 
