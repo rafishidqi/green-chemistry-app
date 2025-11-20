@@ -90,11 +90,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _performSearch(BuildContext context, String query) {
     final postProvider = Provider.of<PostProvider>(context, listen: false);
-    
+    final localization = Provider.of<TranslateProvider>(context, listen: false);
+
+    final queryLower = query.toLowerCase();
+
     final filteredPosts = postProvider.posts.where((post) {
-      return post.judulId.toLowerCase().contains(query.toLowerCase());
+      // Cari di judul Indonesia
+      final judulIdMatch = post.judulId.toLowerCase().contains(queryLower);
+      // Cari di judul English
+      final judulEnMatch = post.judulEn.toLowerCase().contains(queryLower);
+      // Cari di deskripsi Indonesia
+      final descIdMatch = post.descriptionId.toLowerCase().contains(queryLower);
+      // Cari di deskripsi English
+      final descEnMatch = post.descriptionEn.toLowerCase().contains(queryLower);
+
+      return judulIdMatch || judulEnMatch || descIdMatch || descEnMatch;
     }).toList();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -108,9 +120,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: filteredPosts.length,
                   itemBuilder: (context, index) {
                     final post = filteredPosts[index];
+                    // Tampilkan judul sesuai bahasa yang dipilih
+                    final displayTitle = localization.isEnglish ? post.judulEn : post.judulId;
+
                     return ListTile(
                       title: Text(
-                        post.judulId,
+                        displayTitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
