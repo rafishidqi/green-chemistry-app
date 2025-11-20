@@ -51,28 +51,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/univ.jpg'),
-            fit: BoxFit.none,
-            scale: 1.8,
-            alignment: Alignment.center,
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(255, 0, 37, 49).withValues(alpha: 0.75),
-                Color.fromARGB(255, 0, 29, 43).withValues(alpha: 0.80),
-              ],
+      body: Stack(
+        children: [
+          // Background image - responsive
+          Container(
+            width: screenSize.width,
+            height: screenSize.height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/univ.jpg'),
+                fit: BoxFit.cover, // Mengisi seluruh layar
+                alignment: Alignment.center,
+              ),
             ),
           ),
-          child: SafeArea(
+          // Gradient overlay
+          Container(
+            width: screenSize.width,
+            height: screenSize.height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromARGB(255, 0, 37, 49).withValues(alpha: 0.75),
+                  Color.fromARGB(255, 0, 29, 43).withValues(alpha: 0.80),
+                ],
+              ),
+            ),
+          ),
+          // Content
+          SafeArea(
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -110,20 +122,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'Welcome Back!',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Welcome Back!',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Please login with your email address',
-                      style: TextStyle(
-                        fontSize: 14,
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Please login with your email address',
+                        style: TextStyle(
+                          fontSize: 14,
                         color: Colors.white70,
                       ),
                     ),
@@ -229,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
