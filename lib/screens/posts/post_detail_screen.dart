@@ -94,7 +94,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             ? 18.0
             : (isSmall ? 20.0 : 24.0);
     
-    // Hitung tinggi judul berdasarkan panjang teks
     final textPainter = TextPainter(
       text: TextSpan(
         text: widget.post.judulId,
@@ -107,7 +106,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       textDirection: TextDirection.ltr,
     );
     
-    textPainter.layout(maxWidth: size.width - 32); // padding kiri kanan
+    textPainter.layout(maxWidth: size.width - 32);
     return textPainter.size.height;
   }
 
@@ -406,9 +405,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       final isContentShort = totalContentHeight <= maxAllowedHeight;
                       
                       if (isContentShort) {
-                        // SESUAIKAN NILAI INI UNTUK MENGATUR POSISI KONTEN PENDEK
                         // Semakin kecil nilai, semakin dekat dengan author info
-                        final shortContentBottom = 80.0; // <-- UBAH NILAI INI
+                        final shortContentBottom = 80.0;
                         
                         // Tampilkan semua konten tanpa tombol
                         return Positioned(

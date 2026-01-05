@@ -27,7 +27,6 @@ class MyApp extends StatelessWidget {
       title: 'Green Chemistry App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
-      // Langsung ke HomeScreen (login nanti di drawer)
       home: const HomeScreen(),
     );
   }

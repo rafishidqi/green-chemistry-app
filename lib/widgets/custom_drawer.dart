@@ -35,7 +35,6 @@ class _CustomDrawerState extends State<CustomDrawer> with SingleTickerProviderSt
       curve: Curves.easeOutCubic,
     ));
 
-    // Mulai animasi saat drawer dibuka
     _animationController.forward();
   }
 
@@ -126,7 +125,7 @@ class _CustomDrawerState extends State<CustomDrawer> with SingleTickerProviderSt
               ),
             ),
 
-            // 🏠 Beranda (All Posts) dengan animasi
+            // Beranda (All Posts) dengan animasi
             _buildAnimatedListTile(
               delay: 0,
               icon: Icons.home,
@@ -142,7 +141,7 @@ class _CustomDrawerState extends State<CustomDrawer> with SingleTickerProviderSt
 
             const Divider(),
 
-            // 🔐 Login / Dashboard dengan animasi
+            // Login / Dashboard dengan animasi
             if (!auth.isLoggedIn)
               _buildAnimatedListTile(
                 delay: 1,
@@ -171,7 +170,7 @@ class _CustomDrawerState extends State<CustomDrawer> with SingleTickerProviderSt
 
             const Spacer(),
 
-            // 🚪 Logout jika sudah login dengan animasi
+            // Logout jika sudah login dengan animasi
             if (auth.isLoggedIn)
               _buildAnimatedListTile(
                 delay: 2,

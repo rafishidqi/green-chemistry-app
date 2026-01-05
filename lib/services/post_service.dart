@@ -6,7 +6,7 @@ import '../models/post_model.dart';
 import '../config/constants.dart' as constants;
 
 class PostService {
-  /// 🔹 Ambil postingan milik user login
+  // Ambil postingan milik user login
   static Future<List<PostModel>> getUserPosts() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -28,7 +28,7 @@ class PostService {
     }
   }
 
-  /// 🔹 Ambil semua postingan publik (published)
+  // Ambil semua postingan publik (published)
   static Future<List<PostModel>> getAllPosts() async {
     final response = await http.get(
       Uri.parse('${constants.baseUrl}/posts/all'),
@@ -45,14 +45,14 @@ class PostService {
     }
   }
 
-  /// 🔹 Buat postingan baru
+  // Buat postingan baru
   static Future<void> createPost({
     required String judulId,
     required String descriptionId,
     String? judulEn,
     String? descriptionEn,
     String? imageUrl,
-    List<int>? categories, // kirim banyak kategori
+    List<int>? categories,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -88,7 +88,7 @@ class PostService {
     }
   }
 
-  /// 🔹 Update postingan
+  // Update postingan
   static Future<void> updatePost({
     required int id,
     required String judulId,
@@ -130,7 +130,7 @@ class PostService {
     }
   }
 
-  /// 🔹 Hapus postingan berdasarkan ID
+  //Hapus postingan berdasarkan ID
   static Future<void> deletePost(int id) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -149,7 +149,7 @@ class PostService {
     }
   }
 
-  /// 🔹 Ambil detail postingan berdasarkan ID
+  // detail postingan berdasarkan ID
   static Future<PostModel> getPostDetail(int id) async {
     final response = await http.get(
       Uri.parse('${constants.baseUrl}/posts/$id'),

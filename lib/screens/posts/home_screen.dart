@@ -28,14 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _pageController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostProvider>(context, listen: false).fetchAllPosts();
-      _startAutoScroll(); // Mulai auto-scroll carousel
+      _startAutoScroll();
     });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _carouselTimer?.cancel(); // Batalkan timer saat dispose
+    _carouselTimer?.cancel();
     super.dispose();
   }
 
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _startAutoScroll() {
     _carouselTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (_pageController.hasClients) {
-        _currentCarouselIndex = (_currentCarouselIndex + 1) % 5; // Loop ke 5 berita
+        _currentCarouselIndex = (_currentCarouselIndex + 1) % 5;
         _pageController.animateToPage(
           _currentCarouselIndex,
           duration: const Duration(milliseconds: 800),
@@ -120,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: filteredPosts.length,
                   itemBuilder: (context, index) {
                     final post = filteredPosts[index];
-                    // Tampilkan judul sesuai bahasa yang dipilih
                     final displayTitle = localization.isEnglish ? post.judulEn : post.judulId;
 
                     return ListTile(
@@ -188,13 +187,13 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                // 🔹 CAROUSEL HORIZONTAL (5 berita terbaru)
+                // CAROUSEL HORIZONTAL
                 _buildCarousel(postProvider.posts),
 
-                // 🔹 TAB FILTER KATEGORI
+                // TAB FILTER KATEGORI
                 _buildCategoryTabs(postProvider.posts),
 
-                // 🔹 DAFTAR POST (filtered berdasarkan kategori)
+                // DAFTAR POST (filtered berdasarkan kategori)
                 _buildFilteredPostList(postProvider.posts),
               ],
             ),
@@ -204,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Widget untuk Carousel Horizontal (5 berita terbaru)
+  // Widget untuk Carousel Horizontal (5 berita terbaru)
   Widget _buildCarousel(List<PostModel> posts) {
     final localization = Provider.of<TranslateProvider>(context);
 
@@ -291,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                       ),
 
-                      // Overlay gradient (bawah lebih gelap)
+                      // Overlay gradient
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
@@ -403,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Widget untuk Tab Filter Kategori (dinamis dari data)
+  // Widget untuk Tab Filter Kategori (dinamis dari data)
   Widget _buildCategoryTabs(List<PostModel> posts) {
     final localization = Provider.of<TranslateProvider>(context);
 
@@ -527,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Widget untuk menampilkan post yang sudah di-filter
+  // Widget untuk menampilkan post yang sudah di-filter
   Widget _buildFilteredPostList(List<PostModel> posts) {
     // Filter post berdasarkan kategori yang dipilih
     List<PostModel> filteredPosts = posts;

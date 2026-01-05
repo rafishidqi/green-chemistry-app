@@ -31,6 +31,7 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
+
     // Debug logging
     if (kDebugMode) {
       debugPrint('=== POST MODEL FROM JSON ===');
@@ -39,7 +40,7 @@ class PostModel {
       debugPrint('image_url type: ${json['image_url'].runtimeType}');
     }
 
-    // Fungsi helper untuk konversi aman ke int (Mengatasi error "Lingkungan" di field ID)
+    // Helper konversi integer
     int safeInt(dynamic value) {
       if (value == null) return 0;
       if (value is int) {
@@ -47,7 +48,7 @@ class PostModel {
       } else if (value is String) {
         return int.tryParse(value) ?? 0;
       }
-      return 0; // Default jika tipe data tidak terduga
+      return 0;
     }
 
     final List<dynamic>? categoriesData = json['categories'] as List<dynamic>?;
@@ -60,7 +61,7 @@ class PostModel {
     if (categoriesData != null) {
       for (var cat in categoriesData) {
         if (cat is Map) {
-          // Hanya ambil ID asli dari API, jangan gunakan hashCode
+          // ID Asli dari API
           dynamic idValue = cat['id_kategori'];
           String? nameId = cat['kategori_id'];
           String? nameEn = cat['kategori_en'];
@@ -83,12 +84,9 @@ class PostModel {
       }
     }
 
-    // Proses image_url - tambahkan base URL jika path relatif
     String? imageUrl = json['image_url'];
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      // Jika bukan URL lengkap (tidak dimulai dengan http), tambahkan base URL
       if (!imageUrl.startsWith('http')) {
-        // Ambil base URL tanpa /api
         final baseUrlWithoutApi = constants.baseUrl.replaceAll('/api', '');
         imageUrl = '$baseUrlWithoutApi/$imageUrl';
       }
@@ -98,7 +96,7 @@ class PostModel {
     }
 
     return PostModel(
-      // Menerapkan safeInt pada field yang bertipe int
+      // safeInt untuk field int
       idKonten: safeInt(json['id_konten']),
       idAuthor: safeInt(json['id_author']),
 
@@ -125,7 +123,7 @@ class PostModel {
     }
 
     final result = {
-      'id': idKonten, // Di mapping ke 'id' di PostEditScreen
+      'id': idKonten,
       'id_author': idAuthor,
       'judul_id': judulId,
       'judul_en': judulEn,

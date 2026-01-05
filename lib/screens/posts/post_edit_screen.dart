@@ -9,7 +9,7 @@ import '../../config/constants.dart' as constants;
 import '../../config/translate.dart';
 
 class PostEditScreen extends StatefulWidget {
-  final Map<String, dynamic> postData; // data post yang mau diedit
+  final Map<String, dynamic> postData;
 
   const PostEditScreen({super.key, required this.postData});
 
@@ -131,7 +131,7 @@ class _PostEditScreenState extends State<PostEditScreen> {
     setState(() => _loading = true);
 
     try {
-      final idToUpdate = widget.postData['id']; // Mengambil ID post dari data yang dikirim
+      final idToUpdate = widget.postData['id'];
 
       final response = await http.put(
         Uri.parse('${constants.baseUrl}/posts/$idToUpdate'),
@@ -146,7 +146,7 @@ class _PostEditScreenState extends State<PostEditScreen> {
           'description_id': _descIdController.text,
           'description_en': _descEnController.text,
           'image_url': _imageUrlController.text,
-          'categories': _selectedCategories, // List<int> yang aman
+          'categories': _selectedCategories,
         }),
       );
 

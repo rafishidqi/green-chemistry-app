@@ -15,12 +15,10 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil userId dari AuthProvider
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final localization = Provider.of<TranslateProvider>(context);
     final currentUserId = authProvider.userId ?? 0;
 
-    // Cek apakah post ini milik user login
     final isOwner = post.idAuthor == currentUserId;
 
     return InkWell(
@@ -43,7 +41,7 @@ class PostCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 THUMBNAIL (Kiri)
+            // THUMBNAIL (Kiri)
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: post.imageUrl != null && post.imageUrl!.isNotEmpty
@@ -71,7 +69,7 @@ class PostCard extends StatelessWidget {
 
             const SizedBox(width: 12),
 
-            // 🔹 KONTEN (Kanan)
+            // KONTEN (Kanan)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +105,6 @@ class PostCard extends StatelessWidget {
                               builder: (_) => PostEditScreen(postData: post.toMap()),
                             ),
                           ).then((_) {
-                            // opsional: refresh list jika perlu
                           });
                         },
                       ),

@@ -7,12 +7,12 @@ import '../config/constants.dart' as constants;
 class AuthProvider extends ChangeNotifier {
   String? _token;
   String? _userName;
-  int? _userId; // 🔹 tambahkan userId
+  int? _userId;
 
   bool get isLoggedIn => _token != null;
   String? get userName => _userName;
   String? get token => _token;
-  int? get userId => _userId; // 🔹 getter userId
+  int? get userId => _userId;
 
   AuthProvider() {
     loadUser();
@@ -32,12 +32,12 @@ class AuthProvider extends ChangeNotifier {
 
       _token = data['access_token'] ?? data['token'];
       _userName = data['user']['name'];
-      _userId = data['user']['id']; // 🔹 ambil id user
+      _userId = data['user']['id'];
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', _token!);
       await prefs.setString('userName', _userName!);
-      await prefs.setInt('userId', _userId!); // 🔹 simpan userId
+      await prefs.setInt('userId', _userId!);
 
       notifyListeners();
     } else {
@@ -50,7 +50,7 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
     _userName = prefs.getString('userName');
-    _userId = prefs.getInt('userId'); // 🔹 load userId
+    _userId = prefs.getInt('userId');
     notifyListeners();
   }
 
@@ -59,7 +59,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.clear();
     _token = null;
     _userName = null;
-    _userId = null; // 🔹 reset userId
+    _userId = null;
     notifyListeners();
   }
 }

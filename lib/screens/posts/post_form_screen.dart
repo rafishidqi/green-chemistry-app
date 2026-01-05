@@ -81,7 +81,7 @@ class _PostFormScreenState extends State<PostFormScreen> {
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json', // WAJIB ADA INI
+          'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'judul_id': _judulIdController.text,
@@ -89,7 +89,7 @@ class _PostFormScreenState extends State<PostFormScreen> {
           'description_id': _descIdController.text,
           'description_en': _descEnController.text,
           'image_url': _imageUrlController.text,
-          'categories': _selectedCategories, // kirim array langsung
+          'categories': _selectedCategories, 
         }),
       );
 

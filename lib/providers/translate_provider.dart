@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TranslateProvider extends ChangeNotifier {
   static const String _languageKey = 'app_language';
-  static const String _defaultLanguage = 'id'; // Default: Indonesian
+  static const String _defaultLanguage = 'id';
 
   String _currentLanguage = _defaultLanguage;
 
